@@ -1,4 +1,4 @@
-#incldue "cstdio"
+#include "cstdio"
 int main(){
     double in;
     scanf("%lf",&in);
