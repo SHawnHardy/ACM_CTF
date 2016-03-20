@@ -11,6 +11,7 @@ LL prm[M];
 int main(){
     memset(nprm, 0, sizeof(nprm));
     memset(prm, 0, sizeof(prm));
+    nprm[1]=1;
     LL p=0;
     for (LL i=2; i<M; i++) {
         if (!nprm[i])
