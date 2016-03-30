@@ -8,8 +8,6 @@ const LL M=1000100;
 bool nprm[M];
 LL prm[M];
 
-
-
 int main(){
     memset(nprm, 0, sizeof(nprm));
     memset(prm, 0, sizeof(prm));
@@ -37,11 +35,5 @@ int main(){
             }
         }
     }
-    
-    
-    
-    
-    
-    
     return 0;
 }
