@@ -35,3 +35,13 @@ int main(){
     printf("%d\n",ans);
     return 0;
 }
+/*
+#include "cstdio"
+#include "cstdlib"
+int main(){
+    int n;
+    scanf("%d",&n);
+    printf("%d\n",(n-4)/2);
+    return 0;
+}
+ */
