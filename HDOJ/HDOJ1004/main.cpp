@@ -1,11 +1,3 @@
-//
-//  main.cpp
-//  HDOJ1004
-//
-//  Created by 尚恒宇 on 16/1/3.
-//  Copyright © 2016年 尚恒宇. All rights reserved.
-//
-
 #include "cstdlib"
 #include "cstdio"
 #include "cstring"
@@ -22,7 +14,6 @@ int main(){
             return 0;
         }
         memset(ans, 0, sizeof(ans));
-        
         map<string,int> m;
         int p=0;
         while (n--) {
@@ -36,7 +27,6 @@ int main(){
                     ans[0]=ans[t];
                     strcpy(as, in);
                 }
-
             }
             else{
                 int t=m.find(in)->second;

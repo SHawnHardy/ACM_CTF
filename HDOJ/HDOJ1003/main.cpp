@@ -1,14 +1,6 @@
-//
-//  main.cpp
-//  HDOJ1003
-//
-//  Created by 尚恒宇 on 15/12/30.
-//  Copyright © 2015年 尚恒宇. All rights reserved.
-//
-
 #include "cstdio"
 #include "cstring"
-#define M 100010
+const int M=100010;
 
 int in[M];
 int a[M];
@@ -21,8 +13,6 @@ int main(){
         memset(in, 0, sizeof(in));
         memset(a, 0, sizeof(a));
         memset(l, 0, sizeof(l));
-        
-        
         int m=0;
         int ans=0;
         int ap=0;
@@ -52,9 +42,8 @@ int main(){
         }
         printf("Case %d:\n",nn-n);
         printf("%d %d %d",ans,l[ap],ap);
-        if (n) {
+        if (n)
             printf("\n\n");
-        }
         else printf("\n");
     }
     return 0;

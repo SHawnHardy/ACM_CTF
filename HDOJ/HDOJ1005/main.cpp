@@ -1,15 +1,7 @@
-//
-//  main.cpp
-//  HDOJ1005
-//
-//  Created by 尚恒宇 on 16/1/3.
-//  Copyright © 2016年 尚恒宇. All rights reserved.
-//
-
 #include "cstdio"
 #include "cstdlib"
 #include "cstring"
-#define M 2
+const int M=2;
 
 struct Mx{
     int d[M][M];
@@ -42,11 +34,6 @@ Mx operator ^ (Mx a, int k) {
     }
     return c;
 }
-
-
-
-
-
 int main(){
     int A,B,k;
     while(scanf("%d%d%d",&A,&B,&k)!=EOF){
@@ -69,25 +56,6 @@ int main(){
             ans%=7;
             printf("%d\n",ans);
         }
-        
-        
-        
-        
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     return 0;
 }

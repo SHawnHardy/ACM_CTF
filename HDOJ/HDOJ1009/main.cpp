@@ -1,11 +1,3 @@
-//
-//  main.cpp
-//  HDOJ1009
-//
-//  Created by 尚恒宇 on 16/1/6.
-//  Copyright © 2016年 尚恒宇. All rights reserved.
-//
-
 #include "cstdio"
 #include "cstdlib"
 #include "cstring"
@@ -21,22 +13,18 @@ inline int func(const void *a,const void *b){
     if ((!aa->f)&&(!bb->f)) {
         return bb->c-aa->c;
     }
-    else if(!aa->f){
+    else if(!aa->f)
         return -1;
-    }
-    else if(!bb->f){
+    else if(!bb->f)
         return 1;
-    }
     double va=(double)aa->c;
     va/=(double)aa->f;
     double vb=(double)bb->c;
     vb/=(double)bb->f;
-    if (va<vb) {
+    if (va<vb)
         return 1;
-    }
-    else{
+    else
         return -1;
-    }
 }
 
 D da[Max];
@@ -47,9 +35,8 @@ int main(){
         double ans=0;
         int nn=N;
         int ja,fd;
-        if (M==-1) {
+        if (M==-1)
             return 0;
-        }
         while (nn--) {
             scanf("%d%d",&ja,&fd);
             if (!ja) continue;
@@ -71,9 +58,6 @@ int main(){
             }
         }
         printf("%.3f\n",ans);
-        
-        
-        
     }
     return 0;
 }

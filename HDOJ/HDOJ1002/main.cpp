@@ -1,93 +1,76 @@
-//
-//  main.cpp
-//  HDOJ1002
-//
-//  Created by 尚恒宇 on 15/10/13.
-//  Copyright © 2015年 尚恒宇. All rights reserved.
-//
-
 #include "cstdio"
 #include "cstring"
 
-int T=0;
 char a[1010]={0};
 char b[1010]={0};
 char ans[1010]={0};
 
 int main()
 {
+    int T=0;
     scanf("%d",&T);
-    while(T--)
-    {
-        memset(a,0,sizeof(a));
+    for (int c=1; c<=T; c++) {
+        memset(a, 0, sizeof(a));
         memset(b,0,sizeof(b));
         memset(ans, 0, sizeof(ans));
-        
-        scanf("%s%s",a,b);
-        int i=0;
-        while(a[i]!='\0')
-        {
-            a[i]-=48;
-            i++;
+        scanf(" %s %s",a,b);
+        for (int l=0,r=(int)strlen(a)-1; l<r; l++,r--) {
+            char t=a[l];
+            a[l]=a[r];
+            a[r]=t;
         }
-        i--;
-        
-        int j=0;
-        while(b[j]!='\0')
-            j++;
-        j--;
-        
-        int p=1005;
-        ans[p+1]='\0';
-        
-        while ((i+1)||(j+1))
-        {
-            if((i+1)&&(j+1))
-            {
-                ans[p]=a[i]+b[j];
-                i--;
-                j--;
-                p--;
-                continue;
-            }
-            else if(i<0)
-            {
-                while(j+1)
-                {
-                    ans[p]=b[j];
-                    j--;
-                    p--;
-                }
-            }
-            else if(j<0)
-            {
-                while(i+1)
-                {
-                    ans[p]=a[i];
-                    i--;
-                    p--;
-                }
-            }
+        for (int l=0,r=(int)strlen(b)-1; l<r; l++,r--) {
+            char t=b[l];
+            b[l]=b[r];
+            b[r]=t;
         }
-        int h=p;
-        p=1005;
-        while(p>h)
-        {
-            if((int)ans[p]>57)
-            {
-                ans[p]-=10;
-                ans[p-1]++;
+        int flag=0;
+        int p=0,la=(int)strlen(a),lb=(int)strlen(b);
+        while (1) {
+            int t=0;
+            if (p<la) 
+                t+=a[p]-'0';
+            if (p<lb)
+                t+=b[p]-'0';
+            t+=flag;
+            if (t>9) {
+                t-=10;
+                flag=1;
             }
+            else
+                flag=0;
+            ans[p]=t+'0';
+            if (p>=la&&p>=lb&&(!flag))
+                break;
+            p++;
+        }
+        while (ans[p]=='0'&&p>=0)
             p--;
+        if (p<0) {
+            ans[0]='0';
+            ans[1]='\0';
         }
-        if((int)ans[p]>57)
-        {
-            ans[p]-=10;
-            ans[p-1]+=49;
-            p--;
+        else
+            ans[p+1]='\0';
+        for (int l=0,r=(int)strlen(a)-1; l<r; l++,r--) {
+            char t=a[l];
+            a[l]=a[r];
+            a[r]=t;
         }
-        printf("%s",&ans[p]);
-    
+        for (int l=0,r=(int)strlen(b)-1; l<r; l++,r--) {
+            char t=b[l];
+            b[l]=b[r];
+            b[r]=t;
+        }
+        for (int l=0,r=(int)strlen(ans)-1; l<r; l++,r--) {
+            char t=ans[l];
+            ans[l]=ans[r];
+            ans[r]=t;
+        }
+        printf("Case %d:\n",c);
+        printf("%s + %s = %s\n",a,b,ans);
+        if (c<T)
+            putchar('\n');
     }
-    return 0;
+        return 0;
 }
