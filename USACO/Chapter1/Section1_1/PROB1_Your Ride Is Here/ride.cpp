@@ -24,7 +24,9 @@ int main(){
         bb*=(int)(b[i]-'A'+1);
         bb%=47;
     }
-    if (aa==bb)   fprintf(out, "GO\n");
-    else        fprintf(out, "STAY\n");
+    if (aa==bb)   
+        fprintf(out, "GO\n");
+    else        
+        fprintf(out, "STAY\n");
     return 0;
 }
