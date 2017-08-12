@@ -2,6 +2,7 @@
 #include "cstdlib"
 #include "cstring"
 #include "cmath"
+#include "ctime"
 #include "algorithm"
 #include "vector"
 #include "queue"
@@ -14,7 +15,9 @@ using namespace std;
 typedef long long int ll;
 typedef pair<int,int> pii;
 
-const double eps=1e-8;
+const int maxn=5000+10;
+
+const double eps=1e-7;
 const double pi=acos(-1.0);
 
 int sgn(double x) {
@@ -45,8 +48,8 @@ struct pt {
     pt operator - (const pt &b) {
         return pt(x-b.x,y-b.y);
     }
-    bool operator == (const pt &b) {
-        return (sgn(x-b.x)==0) && (sgn(y-b.y)==0);
+    friend bool operator == (const pt &a,const pt &b) {
+        return (sgn(a.x-b.x)==0) && (sgn(a.y-b.y)==0);
     }
     pt operator * (const double &c) {
         return pt(x*c,y*c);
@@ -89,10 +92,9 @@ pt rotpt(pt a, double theta) {
 }
 
 struct ln {
-    pt a,b;
-    int c;                  //0:直线 1:a->b 2:a<-b 3:线段
+    pt a,b;                //0:直线 1:a->b 2:a<-b 3:线段
     ln() {}
-    ln(pt aa,pt bb,int cc) :a(aa),b(bb),c(cc){}
+    ln(pt aa,pt bb) :a(aa),b(bb){}
 };
 
 bool ptOnSeg(pt p,pt s,pt t) {
@@ -123,18 +125,75 @@ struct plg {
     plg(int sz=0) {
         p.resize(sz);
     }
+    void debug() {
+        puts("DEBUG");
+        for (int i=0; i<p.size(); i++) {
+            p[i].debug();
+        }
+    }
+    double comC() {
+        double re=0;
+        for (int i=0; i<(p.size()-1); i++) {
+            re+=dist(p[i+1],p[i]);
+        }
+        return re;
+    }
+    double comS() {
+        double re=0;
+        for (int i=0; i<(p.size()-1); i++) {
+            re+=det(p[i+1],p[i]);
+        }
+        return re/2.0;
+    }
 };
 
+int ptInPlg(pt pt,plg p) {
+    int num=0;
+    for (int i=0; i<(p.p.size()-1); i++) {
+        if (ptOnSeg(pt, p.p[i], p.p[i+1]))
+            return 2;
+        int k=sgn(det(p.p[i+1]-p.p[i],pt-p.p[i]));
+        int d1=sgn(p.p[i].y-pt.y);
+        int d2=sgn(p.p[i+1].y-pt.y);
+        if (k>0 && d1<=0 && d2>0)
+            num++;
+        if (k<0 && d2<=0 && d1>0)
+            num--;
+    }
+    return num!=0;
+}
+
+bool makePlgcCmp(pt a,pt b) {
+    return sgn(a.x-b.x)==0?(sgn(a.y-b.y)<0):(sgn(a.x-b.x)<0);
+}
+
+plg makePlgc(vector<pt> a) {
+    plg re(2*(int)a.size()+5);
+    sort(a.begin(), a.end(), makePlgcCmp);
+    a.erase(unique(a.begin(),a.end()),a.end());
+    int m=0;
+    for (int i=0; i<a.size(); i++) {
+        while (m>1 && sgn(det(re.p[m-1]-re.p[m-2],a[i]-re.p[m-2]))<=0) {
+            m--;
+        }
+        re.p[m++]=a[i];
+    }
+    int k=m;
+    for (int i=((int)a.size()-2); i>=0; i--) {
+        while (m>k && sgn(det(re.p[m-1]-re.p[m-2],a[i]-re.p[m-2]))<=0) {
+            m--;
+        }
+        re.p[m++]=a[i];
+    }
+    re.p.resize(m);
+    return re;
+}
+
+ln L[maxn];
+int U[maxn];
+int D[maxn];
+int ans[maxn];
+
 int main() {
-    vector<int> vt;
-    vt.push_back(0);
-    vt.push_back(1);
-    vt.push_back(2);
-    vt.push_back(3);
-    cout<<vt.size();
-    cout<<vt[0]<<vt[1]<<vt[2]<<vt[3];
-    vt.erase(vt.begin()+1);
-    
-    cout<<vt.size();
-    cout<<vt[0]<<vt[1]<<vt[2]<<vt[3];
+    return 0;
 }
