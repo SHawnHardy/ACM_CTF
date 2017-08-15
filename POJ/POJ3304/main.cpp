@@ -132,9 +132,9 @@ int lnMakePt(ln a,ln b,pt &rst) {
     double s2=det(a.b-b.a,b.b-b.a);
     rst=(s1*a.b-s2*a.a)/(s1-s2);
     int re=0;
-    if (lnCrossSeg(b, a))
+    if (ptOnSeg(rst, a))
         re+=1;
-    if (lnCrossSeg(a, b))
+    if (ptOnSeg(rst, b))
         re+=2;
     return re;
 }
