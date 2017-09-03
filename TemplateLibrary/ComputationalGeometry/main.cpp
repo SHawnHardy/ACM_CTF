@@ -2,7 +2,6 @@
 #include "cstdlib"
 #include "cstring"
 #include "cmath"
-#include "ctime"
 #include "algorithm"
 #include "vector"
 #include "queue"
@@ -10,12 +9,13 @@
 #include "set"
 #include "map"
 #include "iostream"
+#include "complex"
 using namespace std;
 
 typedef long long int ll;
 typedef pair<int,int> pii;
 
-const int maxn=5000+10;
+const int maxn=200+10;
 
 const double eps=1e-7;
 const double pi=acos(-1.0);
@@ -33,6 +33,29 @@ double a2r(double x) {
 }
 double r2a(double x) {
     return x/pi*180;
+}
+double normRad(double x) {
+    if (sgn(x)<0) {
+        double tx=fabs(x);
+        ll fix=ceil(tx/pi/2.0);
+        x+=(fix)*(pi*2.0);
+    }
+    else {
+        ll fix=floor(x/pi/2.0);
+        x-=(fix)*(pi*2.0);
+    }
+    if (sgn(pi*2.0-x)==0)
+        x=0.0;
+    return x;
+}
+double radSub(double a,double b) {
+    a=normRad(a);
+    b=normRad(b);
+    if (sgn(a-b)>=0)
+        return a-b;
+    else {
+        return 2.0*pi-b+a;
+    }
 }
 
 struct pt {
@@ -63,11 +86,14 @@ struct pt {
     double dist() {
         return sqrt(sqr(x)+sqr(y));
     }
+    double arg() {
+        return atan2(y,x);
+    }
     void input() {
         scanf("%lf%lf",&x,&y);
     }
     void output() {
-        printf("%f %f",x,y);
+        printf("%.4f %.4f",x,y);
     }
     void debug() {
         printf("Debug: x:%f\ty:%f\n",x,y);
@@ -84,27 +110,74 @@ double det(pt a, pt b) {
 double dist(pt a, pt b) {
     return (a-b).dist();
 }
-pt rotpt(pt a, pt b, double theta) {
+pt rotPt(pt a, pt b, double theta) {
     return pt((a.x-b.x)*cos(theta)-(a.y-b.y)*sin(theta)+b.x,(a.x-b.x)*sin(theta)+(a.y-b.y)*cos(theta)+b.y);
 }
-pt rotpt(pt a, double theta) {
-    return rotpt(a, pt(0.0, 0.0), theta);
+pt rotPt(pt a, double theta) {
+    return rotPt(a, pt(0.0, 0.0), theta);
 }
 
 struct ln {
     pt a,b;                //0:直线 1:a->b 2:a<-b 3:线段
     ln() {}
     ln(pt aa,pt bb) :a(aa),b(bb){}
+    void input() {
+        a.input();
+        b.input();
+    }
+    void output() {
+        a.output();
+        b.output();
+        putchar('\n');
+    }
+    void rot(pt o,double theta) {
+        a=rotPt(a,o,theta);
+        b=rotPt(b,o,theta);
+    }
 };
 
+ln mvLn(ln l, double len) {
+    pt p=l.b-l.a;
+    p=p/p.dist();
+    p=rotPt(p,pi/2.0);
+    return ln(l.a+p*len,l.b+p*len);
+}
+
 bool ptOnSeg(pt p,pt s,pt t) {
-    return sgn(det(p-s,t-s))==0 && sgn(dot(p-s,p-t))<=0;
+    return (sgn(det(p-s,t-s))==0) && (sgn(dot(p-s,p-t))<=0);
 }
 bool ptOnSeg(pt p,ln a) {
     return ptOnSeg(p, a.a, a.b);
 }
+double dist(pt a, ln l) {
+    return fabs(det(l.a-a,l.b-a)/dist(l.a,l.b));
+}
+double ptSegDist(pt p, ln l) {
+    if (sgn(dot(p-l.a,l.b-l.a))<=0)
+        return dist(p,l.a);
+    else if (sgn(dot(p-l.a,l.b-l.a)-sqr(dist(l.a,l.b)))>=0)
+        return dist(p,l.b);
+    else {
+        return dist(p,l);
+    }
+}
 bool parallel(ln a,ln b) {
     return !sgn(det(a.a-a.b,b.a-b.b));
+}
+bool collineation(ln a,ln b) {
+    return (parallel(a, b)&&parallel(a,ln(b.a,a.b)));
+}
+bool lnCrossSeg(ln l,ln s) {
+    return sgn(det(l.b-l.a,s.a-l.a)*det(l.b-l.a,s.b-l.a))<=0;
+}
+bool segCrossSeg(ln a,ln b) {
+    return
+    max(a.a.x,a.b.x) >= min(b.a.x,b.b.x) &&
+    max(b.a.x,b.b.x) >= min(a.a.x,a.b.x) &&
+    max(a.a.y,a.b.y) >= min(b.a.y,b.b.y) &&
+    max(b.a.y,b.b.y) >= min(a.a.y,a.b.y) &&
+    sgn(det((b.a-a.a),(a.b-a.a)))*sgn(det((b.b-a.a),(a.b-a.a))) <= 0 &&
+    sgn(det((a.a-b.a),(b.b-b.a)))*sgn(det((a.b-b.a),(b.b-b.a))) <= 0;
 }
 int lnMakePt(ln a,ln b,pt &rst) {
     if (parallel(a, b))
@@ -120,10 +193,67 @@ int lnMakePt(ln a,ln b,pt &rst) {
     return re;
 }
 
+pt lnMakePt(ln a,ln b) {
+    double s1=det(a.a-b.a,b.b-b.a);
+    double s2=det(a.b-b.a,b.b-b.a);
+    return (s1*a.b-s2*a.a)/(s1-s2);
+}
+
+double includedAngle(ln a, ln b) {
+    double re=normRad(dot(a.b-a.a,b.b-b.a)/dist(a.a,a.b)/dist(b.a,b.b));
+    if (sgn(re-pi)>0)
+        re-=pi;
+    return re;
+}
+double includedAngle(pt a, pt o, pt b) {
+    double re=radSub((a-o).arg(), (b-o).arg());
+    if (sgn(re-pi)>0)
+        re=2*pi-re;
+    return re;
+}
+
+double detAngel(pt o, pt s, pt t) {
+    double re=includedAngle(s, o, t);
+    if (sgn(normRad((t-o).arg())-normRad((s-o).arg()))<0)
+        return -re;
+    else
+        return re;
+}
+
+struct cc {
+    pt o;
+    double r;
+    cc() {}
+    cc(pt oo, double rr): o(oo),r(rr){}
+    void input() {
+        o.input();
+        scanf("%lf",&r);
+    }
+};
+
+pair<pt,pt> ccCrossCc(cc a, cc b) {
+    double dis=dist(a.o, b.o);
+    double cost=(sqr(a.r)+sqr(dis)-sqr(b.r))/(2.0*a.r*dis);
+    pair<pt, pt> re;
+    re.first=rotPt(b.o-a.o, acos(cost))/((b.o-a.o).dist())*a.r+a.o;
+    re.second=rotPt(b.o-a.o, -acos(cost))/((b.o-a.o).dist())*a.r+a.o;
+    return re;
+}
+
+int ptInCc (pt p, cc c) {
+    int rst=sgn(c.r-dist(p,c.o));
+    return rst==0?1:(rst==1?2:0);
+}
+
 struct plg {
     vector<pt> p;
     plg(int sz=0) {
         p.resize(sz);
+    }
+    plg(vector<pt> pp) {
+        p=pp;
+        p.erase(unique(p.begin(),p.end()),p.end());
+        p.push_back(p[0]);
     }
     void debug() {
         puts("DEBUG");
@@ -141,9 +271,35 @@ struct plg {
     double comS() {
         double re=0;
         for (int i=0; i<(p.size()-1); i++) {
-            re+=det(p[i+1],p[i]);
+            re+=det(p[i],p[i+1]);
         }
         return re/2.0;
+    }
+    double comD(int &fst,int &scd) {
+        double re=0.0;
+        int n=(int)p.size()-1;
+        if (p.size()==2) {
+            fst=0,scd=1;
+            return re;
+        }
+        
+        for (int i=0,j=1; i<n; i++) {
+            while (sgn(det(p[(i+1)%n]-p[i],p[j]-p[i])-det(p[(i+1)%n]-p[i],p[(j+1)%n]-p[i]))<0)
+                j=(j+1)%n;
+            double d=dist(p[i],p[j]);
+            if (d>re) {
+                re=d;
+                fst=i;
+                scd=j;
+            }
+            d=dist(p[(i+1)%n],p[(j+1)%n]);
+            if (d>re) {
+                re=d;
+                fst=i;
+                scd=j;
+            }
+        }
+        return re;
     }
 };
 
@@ -189,11 +345,89 @@ plg makePlgc(vector<pt> a) {
     return re;
 }
 
-ln L[maxn];
-int U[maxn];
-int D[maxn];
-int ans[maxn];
+struct hp {
+    pt s,t;
+    hp(){};
+    hp(pt ss, pt tt): s(ss),t(tt){}
+    hp(ln l): s(l.a),t(l.b){}
+    void input() {
+        s.input();
+        t.input();
+    }
+};
+
+
+bool ptInHp(pt p, hp h) {
+    return sgn(det(h.t-h.s,p-h.s))>=0;
+}
+
+bool hpInterCmp(hp a,hp b) {
+    int rst=sgn((a.t-a.s).arg()-(b.t-b.s).arg());
+    return rst==0?ptInHp(a.s, b):rst<0;
+}
+bool hpUniqueCmp(hp a,hp b) {
+    return sgn((a.t-a.s).arg()-(b.t-b.s).arg())==0;
+}
+
+vector<pt> hpInter(vector<hp> v) {
+    sort(v.begin(),v.end(),hpInterCmp);
+    v.erase(unique(v.begin(),v.end(),hpUniqueCmp),v.end());
+    deque<hp> q;
+    deque<pt> re;
+    q.push_back(v[0]);
+    for (int i=1; i<(int)v.size(); i++) {
+        if (sgn((v[i].t-v[i].s).arg()-(v[i-1].t-v[i-1].s).arg())==0)
+            continue;
+        while (re.size()>0 && !(ptInHp(re.back(), v[i]))) {
+            re.pop_back();
+            q.pop_back();
+        }
+        while (re.size()>0 && !(ptInHp(re.front(), v[i]))) {
+            re.pop_front();
+            q.pop_front();
+        }
+        if (parallel(ln(q.back().s,q.back().t), ln(v[i].s,v[i].t))) {
+            re.resize(0);
+            return vector<pt>(re.begin(),re.end());
+        }
+        re.push_back(lnMakePt(ln(q.back().s,q.back().t), ln(v[i].s,v[i].t)));
+        q.push_back(v[i]);
+    }
+    while (re.size()>0 && !(ptInHp(re.back(), q.front()))) {
+        re.pop_back();
+        q.pop_back();
+    }
+    while (re.size()>0 && !(ptInHp(re.front(), q.back()))) {
+        re.pop_front();
+        q.pop_front();
+    }
+    if (q.size()<=2)
+        re.resize(0);
+    else {
+        if (parallel(ln(q.back().s,q.back().t),ln(q.front().s,q.front().t))) {
+            re.resize(0);
+            return vector<pt>(re.begin(),re.end());
+        }
+        re.push_back(lnMakePt(ln(q.back().s,q.back().t),ln(q.front().s,q.front().t)));
+    }
+    return vector<pt>(re.begin(),re.end());
+}
+
+int n;
+cc C[maxn];
+
 
 int main() {
+    while (scanf("%d",&n)) {
+        for (int i=0; i<n; i++) {
+            C[i].input();
+        }
+    }
     return 0;
 }
+
+
+
+
+
+
