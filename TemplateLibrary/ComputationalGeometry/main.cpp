@@ -10,6 +10,12 @@
 #include "map"
 #include "iostream"
 #include "complex"
+
+#define pb push_back
+#define fi first
+#define se second
+#define dbg(...) cerr<<"["<<#__VA_ARGS__":"<<(__VA_ARGS__)<<"]"<<endl;
+
 using namespace std;
 
 typedef long long int ll;
@@ -17,7 +23,7 @@ typedef pair<int,int> pii;
 
 const int maxn=200+10;
 
-const double eps=1e-7;
+const double eps=1e-8;
 const double pi=acos(-1.0);
 
 int sgn(double x) {
@@ -89,18 +95,35 @@ struct pt {
     double arg() {
         return atan2(y,x);
     }
+    pt direction() {
+        if (sgn(x)==0&&sgn(y)==0)
+            return pt(1,0);
+        else
+            return pt(x,y)/(pt(x,y).dist());
+    }
     void input() {
         scanf("%lf%lf",&x,&y);
     }
     void output() {
-        printf("%.4f %.4f",x,y);
+        printf("%.8f %.8f\n",x,y);
     }
     void debug() {
         printf("Debug: x:%f\ty:%f\n",x,y);
     }
 };
 
-
+int quadrant(pt a) {
+    if (sgn(a.x)>0&&sgn(a.y)>=0)
+        return 1;
+    else if (sgn(a.x)<=0&&sgn(a.y)>0)
+        return 2;
+    else if (sgn(a.x)<0&&sgn(a.y)<=0)
+        return 3;
+    else if (sgn(a.x)>=0&&sgn(a.y)<0)
+        return 4;
+    else
+        return 0;
+}
 double dot(pt a, pt b) {
     return a.x*b.x+a.y*b.y;
 }
@@ -110,6 +133,17 @@ double det(pt a, pt b) {
 double dist(pt a, pt b) {
     return (a-b).dist();
 }
+
+bool polarCmp(pt a,pt b) {
+    return a.arg()>b.arg();
+}
+bool polarCmpAC(pt a,pt b) {
+    if (quadrant(a)==quadrant(b))
+        return sgn(det(a,b))<0;
+    else
+        return ((quadrant(a)-1)^1)<((quadrant(b)-1)^1);
+}
+
 pt rotPt(pt a, pt b, double theta) {
     return pt((a.x-b.x)*cos(theta)-(a.y-b.y)*sin(theta)+b.x,(a.x-b.x)*sin(theta)+(a.y-b.y)*cos(theta)+b.y);
 }
@@ -149,7 +183,7 @@ bool ptOnSeg(pt p,pt s,pt t) {
 bool ptOnSeg(pt p,ln a) {
     return ptOnSeg(p, a.a, a.b);
 }
-double dist(pt a, ln l) {
+double ptLnDist(pt a, ln l) {
     return fabs(det(l.a-a,l.b-a)/dist(l.a,l.b));
 }
 double ptSegDist(pt p, ln l) {
@@ -158,7 +192,7 @@ double ptSegDist(pt p, ln l) {
     else if (sgn(dot(p-l.a,l.b-l.a)-sqr(dist(l.a,l.b)))>=0)
         return dist(p,l.b);
     else {
-        return dist(p,l);
+        return ptLnDist(p,l);
     }
 }
 bool parallel(ln a,ln b) {
@@ -220,31 +254,6 @@ double detAngel(pt o, pt s, pt t) {
         return re;
 }
 
-struct cc {
-    pt o;
-    double r;
-    cc() {}
-    cc(pt oo, double rr): o(oo),r(rr){}
-    void input() {
-        o.input();
-        scanf("%lf",&r);
-    }
-};
-
-pair<pt,pt> ccCrossCc(cc a, cc b) {
-    double dis=dist(a.o, b.o);
-    double cost=(sqr(a.r)+sqr(dis)-sqr(b.r))/(2.0*a.r*dis);
-    pair<pt, pt> re;
-    re.first=rotPt(b.o-a.o, acos(cost))/((b.o-a.o).dist())*a.r+a.o;
-    re.second=rotPt(b.o-a.o, -acos(cost))/((b.o-a.o).dist())*a.r+a.o;
-    return re;
-}
-
-int ptInCc (pt p, cc c) {
-    int rst=sgn(c.r-dist(p,c.o));
-    return rst==0?1:(rst==1?2:0);
-}
-
 struct plg {
     vector<pt> p;
     plg(int sz=0) {
@@ -303,20 +312,24 @@ struct plg {
     }
 };
 
-int ptInPlg(pt pt,plg p) {
+int ptInPlg(pt t,plg p) {
     int num=0;
     for (int i=0; i<(p.p.size()-1); i++) {
-        if (ptOnSeg(pt, p.p[i], p.p[i+1]))
+        if (ptOnSeg(t, p.p[i], p.p[i+1]))
             return 2;
-        int k=sgn(det(p.p[i+1]-p.p[i],pt-p.p[i]));
-        int d1=sgn(p.p[i].y-pt.y);
-        int d2=sgn(p.p[i+1].y-pt.y);
+        int k=sgn(det(p.p[i+1]-p.p[i],t-p.p[i]));
+        int d1=sgn(p.p[i].y-t.y);
+        int d2=sgn(p.p[i+1].y-t.y);
         if (k>0 && d1<=0 && d2>0)
             num++;
         if (k<0 && d2<=0 && d1>0)
             num--;
     }
     return num!=0;
+}
+int ptInPlgc(pt t,plg p) {
+    //todo
+    return 0;
 }
 
 bool makePlgcCmp(pt a,pt b) {
@@ -413,21 +426,62 @@ vector<pt> hpInter(vector<hp> v) {
     return vector<pt>(re.begin(),re.end());
 }
 
-int n;
-cc C[maxn];
-
-
-int main() {
-    while (scanf("%d",&n)) {
-        for (int i=0; i<n; i++) {
-            C[i].input();
-        }
-    }
-    return 0;
+pt triMassCenter(pt a,pt b,pt c) {
+    return (a+b+c)/3;
+}
+pt triCircumCenter(pt a,pt b,pt c) {
+    pt re;
+    double a1=b.x-a.x,b1=b.y-a.y,c1=(sqr(a1)+sqr(b1))/2;
+    double a2=c.x-a.x,b2=c.y-a.y,c2=(sqr(a2)+sqr(b2))/2;
+    double d=a1*b2-a2*b1;
+    re.x=a.x+(c1*b2-c2*b1)/d;
+    re.y=a.y+(a1*c2-a2*c1)/d;
+    return re;
+}
+pt triOrthoCenter(pt a,pt b,pt c) {
+    return triMassCenter(a, b, c)*3.0-triCircumCenter(a,b,c)*2.0;
+}
+pt triInnerCenter(pt a,pt b,pt c) {
+    pt re;
+    double la,lb,lc;
+    la=(b-c).dist();
+    lb=(c-a).dist();
+    lc=(a-b).dist();
+    re.x=(la*a.x+lb*b.x+lc*c.x)/(la+lb+lc);
+    re.y=(la*a.y+lb*b.y+lc*c.y)/(la+lb+lc);
+    return re;
 }
 
 
+struct cc {
+    pt o;
+    double r;
+    cc() {}
+    cc(pt oo, double rr): o(oo),r(rr){}
+    cc(pt a, pt b, pt c) {
+        o=triCircumCenter(a, b, c);
+        r=dist(a,o);
+    }
+    void input() {
+        o.input();
+        scanf("%lf",&r);
+    }
+};
 
+pair<pt,pt> ccCrossCc(cc a, cc b) {
+    double dis=dist(a.o, b.o);
+    double cost=(sqr(a.r)+sqr(dis)-sqr(b.r))/(2.0*a.r*dis);
+    pair<pt, pt> re;
+    re.first=rotPt(b.o-a.o, acos(cost))/((b.o-a.o).dist())*a.r+a.o;
+    re.second=rotPt(b.o-a.o, -acos(cost))/((b.o-a.o).dist())*a.r+a.o;
+    return re;
+}
 
+int ptInCc (pt p, cc c) {
+    int rst=sgn(c.r-dist(p,c.o));
+    return rst==0?1:(rst==1?2:0);
+}
 
-
+int main() {
+    return 0;
+}
