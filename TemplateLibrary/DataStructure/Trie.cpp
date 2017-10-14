@@ -1,4 +1,4 @@
-const int maxn=100010;
+const int MAXN=100010;
 
 struct Trie {
     struct nd{
@@ -10,7 +10,7 @@ struct Trie {
         }
     };
     
-    nd node[maxn*10];
+    nd node[MAXN*10];
     int top;
     
     void init() {

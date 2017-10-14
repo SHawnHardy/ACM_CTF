@@ -21,7 +21,7 @@ using namespace std;
 typedef long long int ll;
 typedef pair<int,int> pii;
 
-const int maxn=200+10;
+const int MAXN=200+10;
 
 const double eps=1e-8;
 const double pi=acos(-1.0);
@@ -105,7 +105,7 @@ struct pt {
         scanf("%lf%lf",&x,&y);
     }
     void output() {
-        printf("%.8f %.8f\n",x,y);
+        printf("%.3f %.3f\n",x,y);
     }
     void debug() {
         printf("Debug: x:%f\ty:%f\n",x,y);
@@ -482,6 +482,57 @@ int ptInCc (pt p, cc c) {
     return rst==0?1:(rst==1?2:0);
 }
 
+
+int n;
+int arr[30];
+double lmt[30][2];
+pt tar;
+
 int main() {
+    scanf("%d",&n);
+    for (int i=0; i<n; i++) {
+        scanf("%d",&arr[i]);
+    }
+    tar.input();
+    lmt[0][0]=0.0;
+    lmt[0][1]=0.0;
+    for (int i=0; i<n; i++) {
+        lmt[i+1][1]=sqrt(sqr(lmt[i][1])+sqr((double)arr[i])+2.0*(double)arr[i]*lmt[i][1]);
+        if (sgn(lmt[i][0]-(double)arr[i])>0) {
+            lmt[i+1][0]=sqrt(sqr(lmt[i][0])+sqr((double)arr[i])-2.0*(double)arr[i]*lmt[i][0]);
+        }
+        else if (sgn(lmt[i][1]-(double)arr[i])<0) {
+            lmt[i+1][0]=sqrt(sqr(lmt[i][1])+sqr((double)arr[i])-2.0*(double)arr[i]*lmt[i][1]);
+        }
+        else {
+            lmt[i+1][0]=0.0;
+        }
+    }
+    
+    if (sgn(lmt[n][0]-tar.dist())>0) {
+        tar=tar.direction()*lmt[n][0];
+    }
+    else if (sgn(lmt[n][1]-tar.dist())<0) {
+        tar=tar.direction()*lmt[n][1];
+    }
+    stack<pt> sk;
+    for (int i=(n-1); i>=0; i--) {
+        sk.push(tar);
+        double d=tar.dist();
+        double len=(double)arr[i];
+        
+        double nxtdist=max(fabs(d-len),lmt[i][0]);
+        double theta=acos((sqr(d)+sqr(len)-sqr(nxtdist))/2.0/d/len);
+        pt delta=(-1.0*tar).direction();
+        delta=rotPt(delta,theta);
+        delta.output();
+        tar=tar+delta*len;
+    }
+    
+    while(!sk.empty()) {
+        sk.top().output();
+        sk.pop();
+    }
+    
     return 0;
 }
