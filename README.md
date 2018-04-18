@@ -1,2 +1,0 @@
-# OnlineJudge
-Hello world
