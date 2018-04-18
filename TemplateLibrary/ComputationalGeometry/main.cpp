@@ -482,57 +482,53 @@ int ptInCc (pt p, cc c) {
     return rst==0?1:(rst==1?2:0);
 }
 
+struct pt3 {
+    double x,y,z;
+    pt3 () {}
+    pt3 (double xx,double yy,double zz): x(xx),y(yy),z(zz) {}
+    
+    double dist() {
+        return mysqrt(sqr(x)+sqr(y)+sqr(z));
+    }
+    
+    
+    pt3 operator - (pt3 a) {
+        return pt3(x-a.x,y-a.y,z-a.z);
+    }
+    bool operator == (pt3 a) {
+        return sgn((*this - a).dist())==0;
+    }
+    
+    void input() {
+        scanf(" %lf %lf %lf",&x,&y,&z);
+    }
+    void output() {
+        printf("%f %f %f\n",x,y,z);
+    }
+};
 
-int n;
-int arr[30];
-double lmt[30][2];
-pt tar;
-
-int main() {
-    scanf("%d",&n);
-    for (int i=0; i<n; i++) {
-        scanf("%d",&arr[i]);
-    }
-    tar.input();
-    lmt[0][0]=0.0;
-    lmt[0][1]=0.0;
-    for (int i=0; i<n; i++) {
-        lmt[i+1][1]=sqrt(sqr(lmt[i][1])+sqr((double)arr[i])+2.0*(double)arr[i]*lmt[i][1]);
-        if (sgn(lmt[i][0]-(double)arr[i])>0) {
-            lmt[i+1][0]=sqrt(sqr(lmt[i][0])+sqr((double)arr[i])-2.0*(double)arr[i]*lmt[i][0]);
-        }
-        else if (sgn(lmt[i][1]-(double)arr[i])<0) {
-            lmt[i+1][0]=sqrt(sqr(lmt[i][1])+sqr((double)arr[i])-2.0*(double)arr[i]*lmt[i][1]);
-        }
-        else {
-            lmt[i+1][0]=0.0;
-        }
-    }
-    
-    if (sgn(lmt[n][0]-tar.dist())>0) {
-        tar=tar.direction()*lmt[n][0];
-    }
-    else if (sgn(lmt[n][1]-tar.dist())<0) {
-        tar=tar.direction()*lmt[n][1];
-    }
-    stack<pt> sk;
-    for (int i=(n-1); i>=0; i--) {
-        sk.push(tar);
-        double d=tar.dist();
-        double len=(double)arr[i];
-        
-        double nxtdist=max(fabs(d-len),lmt[i][0]);
-        double theta=acos((sqr(d)+sqr(len)-sqr(nxtdist))/2.0/d/len);
-        pt delta=(-1.0*tar).direction();
-        delta=rotPt(delta,theta);
-        delta.output();
-        tar=tar+delta*len;
-    }
-    
-    while(!sk.empty()) {
-        sk.top().output();
-        sk.pop();
-    }
-    
-    return 0;
+double dot(pt3 a,pt3 b) {
+    return a.x*b.x+a.y*b.y+a.z*b.z;
 }
+pt3 det(pt3 a, pt3 b) {
+    return pt3(a.y*b.z-a.z*b.y,a.z*b.x-a.x*b.z,a.x*b.y-a.y*b.x);
+}
+
+
+struct plg3 {
+    vector<pt3> P;
+    plg3(int sz=0) {P.resize(sz);}
+    
+    pt3 operator [] (int num) {
+        return P[num];
+    }
+    
+    void insert(pt3 p) {
+        P.push_back(p);
+    }
+    int size() {
+        return P.size();
+    }
+};
+
+
