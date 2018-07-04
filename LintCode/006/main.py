@@ -23,4 +23,3 @@ class Solution:
                 p -= 1
                 pa -= 1
         return A
-

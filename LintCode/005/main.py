@@ -25,4 +25,3 @@ class Solution:
                 return self.kthLargestElement(k, A[:lt])
             else:
                 return self.kthLargestElement(k - lt - 1, A[rt:])
-

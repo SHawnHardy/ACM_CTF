@@ -18,4 +18,3 @@ class Solution:
                 p[2] += 1
 
         return arr[-1]
-
